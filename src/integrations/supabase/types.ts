@@ -14,7 +14,93 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      activities: {
+        Row: {
+          content: Json | null
+          created_at: string | null
+          description: string | null
+          id: string
+          mood_target: string[] | null
+          title: string
+          type: string
+        }
+        Insert: {
+          content?: Json | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          mood_target?: string[] | null
+          title: string
+          type: string
+        }
+        Update: {
+          content?: Json | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          mood_target?: string[] | null
+          title?: string
+          type?: string
+        }
+        Relationships: []
+      }
+      mood_entries: {
+        Row: {
+          ai_suggestion: string | null
+          created_at: string | null
+          detected_emotion: string | null
+          id: string
+          mood_score: number | null
+          mood_type: string
+          notes: string | null
+          user_id: string
+        }
+        Insert: {
+          ai_suggestion?: string | null
+          created_at?: string | null
+          detected_emotion?: string | null
+          id?: string
+          mood_score?: number | null
+          mood_type: string
+          notes?: string | null
+          user_id: string
+        }
+        Update: {
+          ai_suggestion?: string | null
+          created_at?: string | null
+          detected_emotion?: string | null
+          id?: string
+          mood_score?: number | null
+          mood_type?: string
+          notes?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string | null
+          id: string
+          preferred_language: string | null
+          updated_at: string | null
+          username: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id: string
+          preferred_language?: string | null
+          updated_at?: string | null
+          username?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          preferred_language?: string | null
+          updated_at?: string | null
+          username?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

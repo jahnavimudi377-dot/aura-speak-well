@@ -1,0 +1,175 @@
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { User } from "@supabase/supabase-js";
+import Navigation from "@/components/Navigation";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
+import { User as UserIcon, Heart, Calendar } from "lucide-react";
+
+const Profile = () => {
+  const [user, setUser] = useState<User | null>(null);
+  const [username, setUsername] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [stats, setStats] = useState({ totalEntries: 0, joinedDate: "" });
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+      if (!session) navigate("/auth");
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+      if (!session) navigate("/auth");
+    });
+
+    return () => subscription.unsubscribe();
+  }, [navigate]);
+
+  useEffect(() => {
+    if (user) {
+      fetchProfile();
+      fetchStats();
+    }
+  }, [user]);
+
+  const fetchProfile = async () => {
+    if (!user) return;
+    const { data } = await supabase
+      .from("profiles")
+      .select("username")
+      .eq("id", user.id)
+      .single();
+
+    if (data) {
+      setUsername(data.username || "");
+    }
+  };
+
+  const fetchStats = async () => {
+    if (!user) return;
+
+    const { count } = await supabase
+      .from("mood_entries")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", user.id);
+
+    setStats({
+      totalEntries: count || 0,
+      joinedDate: new Date(user.created_at).toLocaleDateString(),
+    });
+  };
+
+  const handleUpdateProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) return;
+
+    setLoading(true);
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .update({ username })
+        .eq("id", user.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Profile updated!",
+        description: "Your changes have been saved.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (!user) return null;
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-accent/5">
+      <Navigation />
+
+      <main className="container mx-auto px-4 py-12 max-w-4xl">
+        <div className="mb-8 animate-slide-up">
+          <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+            Profile
+          </h1>
+          <p className="text-muted-foreground">Manage your account and view your progress</p>
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-6 mb-6">
+          <Card className="p-6 shadow-card">
+            <div className="flex items-center gap-3 mb-4">
+              <Heart className="w-8 h-8 text-primary" />
+              <div>
+                <p className="text-2xl font-bold">{stats.totalEntries}</p>
+                <p className="text-sm text-muted-foreground">Mood Entries</p>
+              </div>
+            </div>
+          </Card>
+
+          <Card className="p-6 shadow-card">
+            <div className="flex items-center gap-3 mb-4">
+              <Calendar className="w-8 h-8 text-accent" />
+              <div>
+                <p className="text-2xl font-bold">{stats.joinedDate}</p>
+                <p className="text-sm text-muted-foreground">Member Since</p>
+              </div>
+            </div>
+          </Card>
+        </div>
+
+        <Card className="p-8 shadow-card">
+          <div className="flex items-center gap-3 mb-6">
+            <UserIcon className="w-8 h-8 text-primary" />
+            <h2 className="text-2xl font-bold">Account Settings</h2>
+          </div>
+
+          <form onSubmit={handleUpdateProfile} className="space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                value={user.email || ""}
+                disabled
+                className="bg-muted"
+              />
+              <p className="text-xs text-muted-foreground">Email cannot be changed</p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="username">Username</Label>
+              <Input
+                id="username"
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Enter your username"
+              />
+            </div>
+
+            <Button type="submit" disabled={loading} className="w-full">
+              {loading ? "Saving..." : "Save Changes"}
+            </Button>
+          </form>
+        </Card>
+      </main>
+    </div>
+  );
+};
+
+export default Profile;

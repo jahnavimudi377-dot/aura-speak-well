@@ -5,6 +5,8 @@ import { User } from "@supabase/supabase-js";
 import Navigation from "@/components/Navigation";
 import { Card } from "@/components/ui/card";
 import { Wind, BookOpen, Puzzle, Sparkles, Music, Play } from "lucide-react";
+import ActivityModal from "@/components/ActivityModal";
+import { useToast } from "@/hooks/use-toast";
 
 const activityIcons = {
   breathing: Wind,
@@ -18,7 +20,10 @@ const activityIcons = {
 const Activities = () => {
   const [user, setUser] = useState<User | null>(null);
   const [activities, setActivities] = useState<any[]>([]);
+  const [selectedActivity, setSelectedActivity] = useState<any>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -53,6 +58,18 @@ const Activities = () => {
     }
   };
 
+  const handleActivityClick = (activity: any) => {
+    setSelectedActivity(activity);
+    setIsModalOpen(true);
+  };
+
+  const handleActivityComplete = () => {
+    toast({
+      title: "Activity completed! 🎉",
+      description: "Great job on taking care of yourself!",
+    });
+  };
+
   if (!user) return null;
 
   return (
@@ -75,6 +92,7 @@ const Activities = () => {
             return (
               <Card
                 key={activity.id}
+                onClick={() => handleActivityClick(activity)}
                 className="p-6 hover:shadow-mood transition-smooth cursor-pointer group"
               >
                 <div className="flex items-start gap-4">
@@ -104,6 +122,13 @@ const Activities = () => {
             );
           })}
         </div>
+
+        <ActivityModal
+          activity={selectedActivity}
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          onComplete={handleActivityComplete}
+        />
 
         {activities.length === 0 && (
           <Card className="p-12 text-center">

@@ -7,12 +7,14 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { User as UserIcon, Heart, Calendar } from "lucide-react";
+import { User as UserIcon, Heart, Calendar, Globe } from "lucide-react";
 
 const Profile = () => {
   const [user, setUser] = useState<User | null>(null);
   const [username, setUsername] = useState("");
+  const [language, setLanguage] = useState("en");
   const [loading, setLoading] = useState(false);
   const [stats, setStats] = useState({ totalEntries: 0, joinedDate: "" });
   const navigate = useNavigate();
@@ -45,12 +47,13 @@ const Profile = () => {
     if (!user) return;
     const { data } = await supabase
       .from("profiles")
-      .select("username")
+      .select("username, preferred_language")
       .eq("id", user.id)
       .single();
 
     if (data) {
       setUsername(data.username || "");
+      setLanguage(data.preferred_language || "en");
     }
   };
 
@@ -76,7 +79,7 @@ const Profile = () => {
     try {
       const { error } = await supabase
         .from("profiles")
-        .update({ username })
+        .update({ username, preferred_language: language })
         .eq("id", user.id);
 
       if (error) throw error;
@@ -160,6 +163,26 @@ const Profile = () => {
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="Enter your username"
               />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="language" className="flex items-center gap-2">
+                <Globe className="w-4 h-4" />
+                Preferred Language
+              </Label>
+              <Select value={language} onValueChange={setLanguage}>
+                <SelectTrigger id="language">
+                  <SelectValue placeholder="Select language" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="en">English</SelectItem>
+                  <SelectItem value="hi">Hindi (हिंदी)</SelectItem>
+                  <SelectItem value="te">Telugu (తెలుగు)</SelectItem>
+                  <SelectItem value="es">Spanish (Español)</SelectItem>
+                  <SelectItem value="fr">French (Français)</SelectItem>
+                  <SelectItem value="de">German (Deutsch)</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <Button type="submit" disabled={loading} className="w-full">

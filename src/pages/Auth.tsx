@@ -66,10 +66,10 @@ const Auth = () => {
             <Sparkles className="w-6 h-6 text-accent" />
           </div>
           <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-            MoodCare
+            Aura Speak Well
           </h1>
           <p className="text-muted-foreground mt-2">
-            Your daily emotional wellness companion
+            AI-powered emotion tracker and mood assistant
           </p>
         </div>
 

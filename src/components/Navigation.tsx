@@ -23,7 +23,7 @@ const Navigation = () => {
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("/")}>
             <Heart className="w-6 h-6 text-primary" />
-            <span className="font-bold text-xl">MoodCare</span>
+            <span className="font-bold text-xl">Aura Speak Well</span>
           </div>
 
           <div className="flex items-center gap-2">

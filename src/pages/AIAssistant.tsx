@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { Brain, Send } from "lucide-react";
+import { Brain, Send, Mic, MicOff } from "lucide-react";
 
 type Message = {
   role: "user" | "assistant";
@@ -19,13 +19,16 @@ const AIAssistant = () => {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
-      content: "Hi! I'm your MoodCare assistant. How are you feeling today? I'm here to listen and support you. 💜",
+      content: "Hi! I'm your Aura Speak Well assistant. How are you feeling today? I'm here to listen and support you. 💜",
     },
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [isListening, setIsListening] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const recognitionRef = useRef<any>(null);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -40,8 +43,57 @@ const AIAssistant = () => {
       if (!session) navigate("/auth");
     });
 
+    // Initialize speech recognition
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      recognitionRef.current = new SpeechRecognition();
+      recognitionRef.current.continuous = false;
+      recognitionRef.current.interimResults = false;
+
+      recognitionRef.current.onresult = (event: any) => {
+        const transcript = event.results[0][0].transcript;
+        setInput(transcript);
+        setIsListening(false);
+      };
+
+      recognitionRef.current.onerror = () => {
+        setIsListening(false);
+        toast({
+          title: "Voice input error",
+          description: "Could not capture voice. Please try again.",
+          variant: "destructive",
+        });
+      };
+
+      recognitionRef.current.onend = () => {
+        setIsListening(false);
+      };
+    }
+
     return () => subscription.unsubscribe();
-  }, [navigate]);
+  }, [navigate, toast]);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  const toggleVoiceInput = () => {
+    if (isListening) {
+      recognitionRef.current?.stop();
+      setIsListening(false);
+    } else {
+      if (recognitionRef.current) {
+        recognitionRef.current.start();
+        setIsListening(true);
+      } else {
+        toast({
+          title: "Voice input unavailable",
+          description: "Your browser doesn't support voice input.",
+          variant: "destructive",
+        });
+      }
+    }
+  };
 
   const handleSend = async () => {
     if (!input.trim() || loading) return;
@@ -51,15 +103,73 @@ const AIAssistant = () => {
     setInput("");
     setLoading(true);
 
-    // Placeholder for AI integration
-    setTimeout(() => {
-      const assistantMessage: Message = {
-        role: "assistant",
-        content: "I hear you. That's important to acknowledge. Would you like to try a calming breathing exercise or talk more about what's on your mind?",
-      };
-      setMessages((prev) => [...prev, assistantMessage]);
+    try {
+      const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat-assistant`;
+      const response = await fetch(CHAT_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        },
+        body: JSON.stringify({ messages: [...messages, userMessage] }),
+      });
+
+      if (!response.ok || !response.body) {
+        throw new Error("Failed to get response");
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let assistantContent = "";
+      let textBuffer = "";
+
+      setMessages((prev) => [...prev, { role: "assistant", content: "" }]);
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        textBuffer += decoder.decode(value, { stream: true });
+        let newlineIndex: number;
+
+        while ((newlineIndex = textBuffer.indexOf("\n")) !== -1) {
+          let line = textBuffer.slice(0, newlineIndex);
+          textBuffer = textBuffer.slice(newlineIndex + 1);
+
+          if (line.endsWith("\r")) line = line.slice(0, -1);
+          if (line.startsWith(":") || line.trim() === "") continue;
+          if (!line.startsWith("data: ")) continue;
+
+          const jsonStr = line.slice(6).trim();
+          if (jsonStr === "[DONE]") break;
+
+          try {
+            const parsed = JSON.parse(jsonStr);
+            const content = parsed.choices?.[0]?.delta?.content;
+            if (content) {
+              assistantContent += content;
+              setMessages((prev) =>
+                prev.map((msg, idx) =>
+                  idx === prev.length - 1 ? { ...msg, content: assistantContent } : msg
+                )
+              );
+            }
+          } catch {
+            continue;
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Chat error:", error);
+      toast({
+        title: "Error",
+        description: "Failed to get response. Please try again.",
+        variant: "destructive",
+      });
+      setMessages((prev) => prev.slice(0, -1));
+    } finally {
       setLoading(false);
-    }, 1000);
+    }
   };
 
   if (!user) return null;
@@ -85,21 +195,21 @@ const AIAssistant = () => {
             {messages.map((message, index) => (
               <div
                 key={index}
-                className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
+                className={`flex ${message.role === "user" ? "justify-end" : "justify-start"} animate-slide-up`}
               >
                 <div
-                  className={`max-w-[80%] rounded-2xl px-4 py-3 ${
+                  className={`max-w-[80%] rounded-2xl px-4 py-3 transition-smooth ${
                     message.role === "user"
                       ? "bg-primary text-primary-foreground"
                       : "bg-muted"
                   }`}
                 >
-                  <p className="text-sm">{message.content}</p>
+                  <p className="text-sm whitespace-pre-wrap">{message.content}</p>
                 </div>
               </div>
             ))}
             {loading && (
-              <div className="flex justify-start">
+              <div className="flex justify-start animate-slide-up">
                 <div className="bg-muted rounded-2xl px-4 py-3">
                   <div className="flex gap-2">
                     <div className="w-2 h-2 bg-primary rounded-full animate-bounce" />
@@ -109,19 +219,30 @@ const AIAssistant = () => {
                 </div>
               </div>
             )}
+            <div ref={messagesEndRef} />
           </div>
 
           {/* Input */}
           <div className="border-t p-4">
             <div className="flex gap-2">
+              <Button
+                onClick={toggleVoiceInput}
+                disabled={loading}
+                size="icon"
+                variant={isListening ? "destructive" : "outline"}
+                className="transition-smooth"
+              >
+                {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+              </Button>
               <Input
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                onKeyPress={(e) => e.key === "Enter" && handleSend()}
-                placeholder="Type your message..."
-                className="flex-1"
+                onKeyPress={(e) => e.key === "Enter" && !e.shiftKey && handleSend()}
+                placeholder={isListening ? "Listening..." : "Type or speak your message..."}
+                className="flex-1 transition-smooth"
+                disabled={loading || isListening}
               />
-              <Button onClick={handleSend} disabled={loading} size="icon">
+              <Button onClick={handleSend} disabled={loading || !input.trim()} size="icon">
                 <Send className="w-4 h-4" />
               </Button>
             </div>

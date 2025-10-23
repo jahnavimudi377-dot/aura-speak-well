@@ -8,7 +8,8 @@ import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Smile, Meh, Frown, Heart, Zap, Cloud } from "lucide-react";
+import { Smile, Meh, Frown, Heart, Zap, Cloud, Sparkles, Loader2 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 type MoodType = "amazing" | "happy" | "okay" | "sad" | "stressed" | "anxious";
 
@@ -26,7 +27,10 @@ const MoodJournal = () => {
   const [selectedMood, setSelectedMood] = useState<MoodType | null>(null);
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
+  const [analyzing, setAnalyzing] = useState(false);
   const [moodHistory, setMoodHistory] = useState<any[]>([]);
+  const [detectedEmotion, setDetectedEmotion] = useState<string>("");
+  const [aiSuggestion, setAiSuggestion] = useState<string>("");
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -64,6 +68,50 @@ const MoodJournal = () => {
     }
   };
 
+  const analyzeWithAI = async () => {
+    if (!notes.trim()) {
+      toast({
+        title: "No text to analyze",
+        description: "Please write something first.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setAnalyzing(true);
+    try {
+      const ANALYZE_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/analyze-mood`;
+      const response = await fetch(ANALYZE_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        },
+        body: JSON.stringify({ text: notes }),
+      });
+
+      if (!response.ok) throw new Error("Failed to analyze mood");
+
+      const analysis = await response.json();
+      setDetectedEmotion(analysis.emotion);
+      setAiSuggestion(analysis.suggestion);
+
+      toast({
+        title: "AI Analysis Complete",
+        description: `Detected emotion: ${analysis.emotion}`,
+      });
+    } catch (error) {
+      console.error("Analysis error:", error);
+      toast({
+        title: "Analysis failed",
+        description: "Could not analyze mood. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setAnalyzing(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedMood || !user) return;
@@ -74,6 +122,8 @@ const MoodJournal = () => {
         user_id: user.id,
         mood_type: selectedMood,
         notes,
+        detected_emotion: detectedEmotion || null,
+        ai_suggestion: aiSuggestion || null,
       });
 
       if (error) throw error;
@@ -85,6 +135,8 @@ const MoodJournal = () => {
 
       setSelectedMood(null);
       setNotes("");
+      setDetectedEmotion("");
+      setAiSuggestion("");
       fetchMoodHistory();
     } catch (error: any) {
       toast({
@@ -143,18 +195,56 @@ const MoodJournal = () => {
                 id="notes"
                 placeholder="What's on your mind today?"
                 value={notes}
-                onChange={(e) => setNotes(e.target.value)}
+                onChange={(e) => {
+                  setNotes(e.target.value);
+                  setDetectedEmotion("");
+                  setAiSuggestion("");
+                }}
                 className="mt-2 min-h-32"
               />
             </div>
 
-            <Button
-              type="submit"
-              disabled={!selectedMood || loading}
-              className="w-full"
-            >
-              {loading ? "Saving..." : "Log Mood"}
-            </Button>
+            {detectedEmotion && (
+              <div className="p-4 bg-primary/10 rounded-lg animate-fade-in border border-primary/20">
+                <div className="flex items-center gap-2 mb-2">
+                  <Sparkles className="w-4 h-4 text-primary animate-pulse-glow" />
+                  <span className="font-semibold text-sm">AI Detected:</span>
+                  <Badge variant="secondary" className="capitalize">{detectedEmotion}</Badge>
+                </div>
+                {aiSuggestion && (
+                  <p className="text-sm text-muted-foreground mt-2">{aiSuggestion}</p>
+                )}
+              </div>
+            )}
+
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                onClick={analyzeWithAI}
+                disabled={analyzing || !notes.trim()}
+                variant="outline"
+                className="flex-1"
+              >
+                {analyzing ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Analyzing...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-4 h-4 mr-2" />
+                    Analyze with AI
+                  </>
+                )}
+              </Button>
+              <Button
+                type="submit"
+                disabled={!selectedMood || loading}
+                className="flex-1"
+              >
+                {loading ? "Saving..." : "Log Mood"}
+              </Button>
+            </div>
           </form>
         </Card>
 
@@ -174,14 +264,24 @@ const MoodJournal = () => {
                   <div className="flex items-start gap-4">
                     <Icon className={`w-8 h-8 ${mood?.color}`} />
                     <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
+                      <div className="flex items-center gap-2 mb-1 flex-wrap">
                         <p className="font-semibold">{mood?.label}</p>
+                        {entry.detected_emotion && entry.detected_emotion !== entry.mood_type && (
+                          <Badge variant="outline" className="text-xs">
+                            AI: {entry.detected_emotion}
+                          </Badge>
+                        )}
                         <span className="text-sm text-muted-foreground">
                           {new Date(entry.created_at).toLocaleDateString()}
                         </span>
                       </div>
                       {entry.notes && (
-                        <p className="text-muted-foreground text-sm">{entry.notes}</p>
+                        <p className="text-muted-foreground text-sm mb-2">{entry.notes}</p>
+                      )}
+                      {entry.ai_suggestion && (
+                        <div className="text-xs text-primary/80 italic border-l-2 border-primary/30 pl-2 mt-2">
+                          💡 {entry.ai_suggestion}
+                        </div>
                       )}
                     </div>
                   </div>

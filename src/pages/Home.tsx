@@ -39,10 +39,10 @@ const Home = () => {
             <Heart className="w-16 h-16 text-primary animate-float" />
           </div>
           <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent">
-            Welcome to MoodCare
+            Welcome to Aura Speak Well
           </h1>
           <p className="text-xl text-muted-foreground mb-8">
-            Your personal AI-powered emotional wellness companion
+            AI-powered emotion tracker that speaks to your mood and guides your mind toward positivity
           </p>
           <Button
             size="lg"

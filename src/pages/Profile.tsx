@@ -8,17 +8,21 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { User as UserIcon, Heart, Calendar, Globe } from "lucide-react";
+import { useNotifications } from "@/hooks/use-notifications";
+import { User as UserIcon, Heart, Calendar, Globe, Bell } from "lucide-react";
 
 const Profile = () => {
   const [user, setUser] = useState<User | null>(null);
   const [username, setUsername] = useState("");
   const [language, setLanguage] = useState("en");
   const [loading, setLoading] = useState(false);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [stats, setStats] = useState({ totalEntries: 0, joinedDate: "" });
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { permission, requestPermission, isSupported } = useNotifications();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -42,6 +46,12 @@ const Profile = () => {
       fetchStats();
     }
   }, [user]);
+
+  useEffect(() => {
+    if (isSupported) {
+      setNotificationsEnabled(permission === "granted");
+    }
+  }, [permission, isSupported]);
 
   const fetchProfile = async () => {
     if (!user) return;
@@ -96,6 +106,19 @@ const Profile = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleNotificationToggle = async (enabled: boolean) => {
+    if (enabled) {
+      const granted = await requestPermission();
+      setNotificationsEnabled(granted);
+    } else {
+      setNotificationsEnabled(false);
+      toast({
+        title: "Notifications Disabled",
+        description: "You can re-enable them anytime in browser settings",
+      });
     }
   };
 
@@ -183,6 +206,31 @@ const Profile = () => {
                   <SelectItem value="de">German (Deutsch)</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between p-4 border rounded-lg">
+                <div className="space-y-0.5">
+                  <div className="flex items-center gap-2">
+                    <Bell className="w-4 h-4 text-primary" />
+                    <Label htmlFor="notifications" className="cursor-pointer">Daily Mood Reminders</Label>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Get notified daily at 8 PM to log your mood
+                  </p>
+                </div>
+                <Switch
+                  id="notifications"
+                  checked={notificationsEnabled}
+                  onCheckedChange={handleNotificationToggle}
+                  disabled={!isSupported}
+                />
+              </div>
+              {!isSupported && (
+                <p className="text-xs text-muted-foreground">
+                  Notifications are not supported in your browser
+                </p>
+              )}
             </div>
 
             <Button type="submit" disabled={loading} className="w-full">

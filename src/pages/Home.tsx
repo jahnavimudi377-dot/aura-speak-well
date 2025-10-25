@@ -3,11 +3,25 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 import { Button } from "@/components/ui/button";
-import { Heart, Brain, Activity, User as UserIcon } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { Heart, Brain, Activity, TrendingUp, Calendar } from "lucide-react";
 import Navigation from "@/components/Navigation";
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
+
+const MOOD_COLORS: Record<string, string> = {
+  happy: "hsl(29, 92%, 72%)",
+  calm: "hsl(201, 87%, 77%)",
+  energetic: "hsl(158, 77%, 67%)",
+  anxious: "hsl(261, 51%, 71%)",
+  sad: "hsl(220, 60%, 65%)",
+  stressed: "hsl(0, 84%, 70%)",
+};
 
 const Home = () => {
   const [user, setUser] = useState<User | null>(null);
+  const [moodData, setMoodData] = useState<any[]>([]);
+  const [moodDistribution, setMoodDistribution] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -26,6 +40,64 @@ const Home = () => {
     return () => subscription.unsubscribe();
   }, [navigate]);
 
+  useEffect(() => {
+    if (user) {
+      fetchMoodAnalytics();
+    }
+  }, [user]);
+
+  const fetchMoodAnalytics = async () => {
+    setLoading(true);
+    
+    // Fetch last 30 days of mood entries
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    const { data, error } = await supabase
+      .from("mood_entries")
+      .select("*")
+      .eq("user_id", user?.id)
+      .gte("created_at", thirtyDaysAgo.toISOString())
+      .order("created_at", { ascending: true });
+
+    if (!error && data) {
+      // Process data for line chart (last 7 days)
+      const last7Days = data.slice(-7).map((entry) => ({
+        date: new Date(entry.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+        score: entry.mood_score || getMoodScore(entry.mood_type),
+      }));
+
+      // Process data for pie chart (mood distribution)
+      const moodCounts: Record<string, number> = {};
+      data.forEach((entry) => {
+        moodCounts[entry.mood_type] = (moodCounts[entry.mood_type] || 0) + 1;
+      });
+
+      const distribution = Object.entries(moodCounts).map(([mood, count]) => ({
+        name: mood,
+        value: count,
+        color: MOOD_COLORS[mood] || "hsl(261, 51%, 71%)",
+      }));
+
+      setMoodData(last7Days);
+      setMoodDistribution(distribution);
+    }
+    
+    setLoading(false);
+  };
+
+  const getMoodScore = (moodType: string): number => {
+    const scores: Record<string, number> = {
+      happy: 9,
+      energetic: 8,
+      calm: 7,
+      anxious: 4,
+      stressed: 3,
+      sad: 2,
+    };
+    return scores[moodType] || 5;
+  };
+
   if (!user) return null;
 
   return (
@@ -34,7 +106,7 @@ const Home = () => {
       
       <main className="container mx-auto px-4 py-12">
         {/* Hero Section */}
-        <div className="text-center max-w-3xl mx-auto mb-16 animate-slide-up">
+        <div className="text-center max-w-3xl mx-auto mb-12 animate-slide-up">
           <div className="flex items-center justify-center mb-6">
             <Heart className="w-16 h-16 text-primary animate-float" />
           </div>
@@ -52,6 +124,79 @@ const Home = () => {
             Log Your Mood Today
           </Button>
         </div>
+
+        {/* Mood Analytics Dashboard */}
+        {!loading && moodData.length > 0 && (
+          <div className="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto mb-12 animate-slide-up">
+            {/* Mood Trend Chart */}
+            <Card className="p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <TrendingUp className="w-5 h-5 text-primary" />
+                <h3 className="text-lg font-semibold">7-Day Mood Trend</h3>
+              </div>
+              <ResponsiveContainer width="100%" height={200}>
+                <LineChart data={moodData}>
+                  <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" fontSize={12} />
+                  <YAxis hide domain={[0, 10]} />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: "hsl(var(--card))", 
+                      border: "1px solid hsl(var(--border))",
+                      borderRadius: "0.5rem"
+                    }} 
+                  />
+                  <Line 
+                    type="monotone" 
+                    dataKey="score" 
+                    stroke="hsl(var(--primary))" 
+                    strokeWidth={3}
+                    dot={{ fill: "hsl(var(--primary))", r: 4 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </Card>
+
+            {/* Mood Distribution */}
+            <Card className="p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <Calendar className="w-5 h-5 text-accent" />
+                <h3 className="text-lg font-semibold">Mood Distribution</h3>
+              </div>
+              <ResponsiveContainer width="100%" height={200}>
+                <PieChart>
+                  <Pie
+                    data={moodDistribution}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={50}
+                    outerRadius={80}
+                    paddingAngle={5}
+                    dataKey="value"
+                  >
+                    {moodDistribution.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: "hsl(var(--card))", 
+                      border: "1px solid hsl(var(--border))",
+                      borderRadius: "0.5rem"
+                    }} 
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+              <div className="flex flex-wrap gap-2 mt-4 justify-center">
+                {moodDistribution.map((mood) => (
+                  <div key={mood.name} className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: mood.color }}></div>
+                    <span className="text-xs text-muted-foreground capitalize">{mood.name}</span>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          </div>
+        )}
 
         {/* Features Grid */}
         <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">

@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { Brain, Send, Mic, MicOff } from "lucide-react";
+import { Brain, Send, Mic, MicOff, Volume2, VolumeX } from "lucide-react";
 
 type Message = {
   role: "user" | "assistant";
@@ -25,10 +25,12 @@ const AIAssistant = () => {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [isListening, setIsListening] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
+  const speechSynthesis = window.speechSynthesis;
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -95,6 +97,30 @@ const AIAssistant = () => {
     }
   };
 
+  const speakText = (text: string) => {
+    if ('speechSynthesis' in window) {
+      speechSynthesis.cancel();
+      
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 0.9;
+      utterance.pitch = 1.0;
+      utterance.volume = 1.0;
+      
+      utterance.onstart = () => setIsSpeaking(true);
+      utterance.onend = () => setIsSpeaking(false);
+      utterance.onerror = () => setIsSpeaking(false);
+      
+      speechSynthesis.speak(utterance);
+    }
+  };
+
+  const stopSpeaking = () => {
+    if ('speechSynthesis' in window) {
+      speechSynthesis.cancel();
+      setIsSpeaking(false);
+    }
+  };
+
   const handleSend = async () => {
     if (!input.trim() || loading) return;
 
@@ -127,7 +153,13 @@ const AIAssistant = () => {
 
       while (true) {
         const { done, value } = await reader.read();
-        if (done) break;
+        if (done) {
+          // Speak the complete message when streaming is done
+          if (assistantContent) {
+            speakText(assistantContent);
+          }
+          break;
+        }
 
         textBuffer += decoder.decode(value, { stream: true });
         let newlineIndex: number;
@@ -186,7 +218,7 @@ const AIAssistant = () => {
               AI Assistant
             </h1>
           </div>
-          <p className="text-muted-foreground">Your supportive companion for emotional wellness</p>
+          <p className="text-muted-foreground">Your supportive companion for emotional wellness with voice responses</p>
         </div>
 
         <Card className="flex flex-col h-[600px] shadow-card">
@@ -197,14 +229,36 @@ const AIAssistant = () => {
                 key={index}
                 className={`flex ${message.role === "user" ? "justify-end" : "justify-start"} animate-slide-up`}
               >
-                <div
-                  className={`max-w-[80%] rounded-2xl px-4 py-3 transition-smooth ${
-                    message.role === "user"
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted"
-                  }`}
-                >
-                  <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                <div className="flex flex-col gap-2">
+                  <div
+                    className={`max-w-[80%] rounded-2xl px-4 py-3 transition-smooth ${
+                      message.role === "user"
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-muted"
+                    }`}
+                  >
+                    <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                  </div>
+                  {message.role === "assistant" && index === messages.length - 1 && !loading && (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="self-start"
+                      onClick={() => isSpeaking ? stopSpeaking() : speakText(message.content)}
+                    >
+                      {isSpeaking ? (
+                        <>
+                          <VolumeX className="w-4 h-4 mr-2" />
+                          Stop
+                        </>
+                      ) : (
+                        <>
+                          <Volume2 className="w-4 h-4 mr-2" />
+                          Read Aloud
+                        </>
+                      )}
+                    </Button>
+                  )}
                 </div>
               </div>
             ))}

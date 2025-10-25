@@ -1,0 +1,62 @@
+[
+  {
+    "id": "1",
+    "title": "Weightless",
+    "artist": "Marconi Union",
+    "type": "youtube",
+    "url": "https://www.youtube.com/watch?v=UfcAVejslrU",
+    "embedId": "UfcAVejslrU",
+    "thumbnail": "https://img.youtube.com/vi/UfcAVejslrU/hqdefault.jpg",
+    "duration": "8:09"
+  },
+  {
+    "id": "2",
+    "title": "Calm Piano Music",
+    "artist": "Peaceful Melodies",
+    "type": "youtube",
+    "url": "https://www.youtube.com/watch?v=1ZYbU82GVz4",
+    "embedId": "1ZYbU82GVz4",
+    "thumbnail": "https://img.youtube.com/vi/1ZYbU82GVz4/hqdefault.jpg",
+    "duration": "3:00:00"
+  },
+  {
+    "id": "3",
+    "title": "Meditation Music",
+    "artist": "Relaxing Sounds",
+    "type": "youtube",
+    "url": "https://www.youtube.com/watch?v=lFcSrYw-ARY",
+    "embedId": "lFcSrYw-ARY",
+    "thumbnail": "https://img.youtube.com/vi/lFcSrYw-ARY/hqdefault.jpg",
+    "duration": "3:00:00"
+  },
+  {
+    "id": "4",
+    "title": "Ocean Waves",
+    "artist": "Nature Sounds",
+    "type": "youtube",
+    "url": "https://www.youtube.com/watch?v=WHPEKLQID4U",
+    "embedId": "WHPEKLQID4U",
+    "thumbnail": "https://img.youtube.com/vi/WHPEKLQID4U/hqdefault.jpg",
+    "duration": "10:00:00"
+  },
+  {
+    "id": "5",
+    "title": "Rain Sounds",
+    "artist": "Nature Therapy",
+    "type": "youtube",
+    "url": "https://www.youtube.com/watch?v=q76bMs-NwRk",
+    "embedId": "q76bMs-NwRk",
+    "thumbnail": "https://img.youtube.com/vi/q76bMs-NwRk/hqdefault.jpg",
+    "duration": "3:00:00"
+  },
+  {
+    "id": "6",
+    "title": "Forest Ambience",
+    "artist": "Calming Forest",
+    "type": "youtube",
+    "url": "https://www.youtube.com/watch?v=xNN7iTA57jg",
+    "embedId": "xNN7iTA57jg",
+    "thumbnail": "https://img.youtube.com/vi/xNN7iTA57jg/hqdefault.jpg",
+    "duration": "8:00:00"
+  }
+]

@@ -80,25 +80,18 @@ const MoodJournal = () => {
 
     setAnalyzing(true);
     try {
-      const ANALYZE_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/analyze-mood`;
-      const response = await fetch(ANALYZE_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-        },
-        body: JSON.stringify({ text: notes }),
+      const { data, error } = await supabase.functions.invoke("analyze-mood", {
+        body: { text: notes },
       });
 
-      if (!response.ok) throw new Error("Failed to analyze mood");
+      if (error) throw error;
 
-      const analysis = await response.json();
-      setDetectedEmotion(analysis.emotion);
-      setAiSuggestion(analysis.suggestion);
+      setDetectedEmotion(data.emotion);
+      setAiSuggestion(data.suggestion);
 
       toast({
         title: "AI Analysis Complete",
-        description: `Detected emotion: ${analysis.emotion}`,
+        description: `Detected emotion: ${data.emotion}`,
       });
     } catch (error) {
       console.error("Analysis error:", error);
@@ -163,11 +156,11 @@ const MoodJournal = () => {
           <p className="text-muted-foreground">How are you feeling today?</p>
         </div>
 
-        <Card className="p-8 mb-8 shadow-card">
+        <Card className="p-8 mb-8 shadow-card transition-smooth hover:shadow-mood">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <Label className="text-lg mb-4 block">Select your mood</Label>
-              <div className="grid grid-cols-3 gap-4">
+              <Label className="text-lg mb-4 block font-semibold">Select your mood</Label>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
                 {moodOptions.map((mood) => {
                   const Icon = mood.icon;
                   return (
@@ -175,14 +168,18 @@ const MoodJournal = () => {
                       key={mood.type}
                       type="button"
                       onClick={() => setSelectedMood(mood.type)}
-                      className={`p-6 rounded-xl border-2 transition-smooth hover:scale-105 ${
+                      className={`p-4 md:p-6 rounded-xl border-2 transition-all duration-300 hover:scale-105 active:scale-95 ${
                         selectedMood === mood.type
-                          ? "border-primary bg-primary/10 shadow-mood"
-                          : "border-border hover:border-primary/50"
+                          ? "border-primary bg-primary/10 shadow-mood ring-2 ring-primary/20"
+                          : "border-border hover:border-primary/50 hover:bg-primary/5"
                       }`}
+                      aria-label={`Select ${mood.label} mood`}
                     >
-                      <Icon className={`w-12 h-12 mx-auto mb-2 ${mood.color}`} />
-                      <p className="font-medium">{mood.label}</p>
+                      <Icon className={`w-10 h-10 md:w-12 md:h-12 mx-auto mb-2 ${mood.color} transition-transform ${
+                        selectedMood === mood.type ? "animate-pulse-glow" : ""
+                      }`} />
+                      <p className="font-medium text-sm md:text-base">{mood.label}</p>
+                      <span className="text-2xl block mt-1">{mood.emoji}</span>
                     </button>
                   );
                 })}

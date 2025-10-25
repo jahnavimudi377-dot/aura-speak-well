@@ -1,8 +1,9 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import { Heart, BookHeart, Brain, Activity, User, LogOut } from "lucide-react";
+import { Heart, BookHeart, Brain, Activity, User, LogOut, Music, Video } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 const Navigation = () => {
   const navigate = useNavigate();
@@ -26,7 +27,7 @@ const Navigation = () => {
             <span className="font-bold text-xl">Aura Speak Well</span>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             <Button
               variant="ghost"
               size="sm"
@@ -34,7 +35,7 @@ const Navigation = () => {
               className="gap-2"
             >
               <Heart className="w-4 h-4" />
-              Home
+              <span className="hidden md:inline">Home</span>
             </Button>
             <Button
               variant="ghost"
@@ -43,7 +44,7 @@ const Navigation = () => {
               className="gap-2"
             >
               <BookHeart className="w-4 h-4" />
-              Journal
+              <span className="hidden md:inline">Journal</span>
             </Button>
             <Button
               variant="ghost"
@@ -52,7 +53,7 @@ const Navigation = () => {
               className="gap-2"
             >
               <Brain className="w-4 h-4" />
-              Assistant
+              <span className="hidden md:inline">Assistant</span>
             </Button>
             <Button
               variant="ghost"
@@ -61,7 +62,25 @@ const Navigation = () => {
               className="gap-2"
             >
               <Activity className="w-4 h-4" />
-              Activities
+              <span className="hidden md:inline">Activities</span>
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate("/playlist")}
+              className="gap-2"
+            >
+              <Music className="w-4 h-4" />
+              <span className="hidden md:inline">Playlist</span>
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate("/videos")}
+              className="gap-2"
+            >
+              <Video className="w-4 h-4" />
+              <span className="hidden md:inline">Videos</span>
             </Button>
             <Button
               variant="ghost"
@@ -70,8 +89,9 @@ const Navigation = () => {
               className="gap-2"
             >
               <User className="w-4 h-4" />
-              Profile
+              <span className="hidden md:inline">Profile</span>
             </Button>
+            <ThemeToggle />
             <Button
               variant="ghost"
               size="sm"
@@ -79,7 +99,7 @@ const Navigation = () => {
               className="gap-2"
             >
               <LogOut className="w-4 h-4" />
-              Logout
+              <span className="hidden md:inline">Logout</span>
             </Button>
           </div>
         </div>

@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Heart, Brain, Activity, TrendingUp, Calendar } from "lucide-react";
+import { Heart, Brain, Activity, TrendingUp, Calendar, Music, Video } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 
@@ -199,7 +199,7 @@ const Home = () => {
         )}
 
         {/* Features Grid */}
-        <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
           <FeatureCard
             icon={<Heart className="w-8 h-8 text-primary" />}
             title="Mood Tracking"
@@ -218,6 +218,18 @@ const Home = () => {
             description="Discover calming exercises and mood-boosting activities"
             onClick={() => navigate("/activities")}
           />
+          <FeatureCard
+            icon={<Music className="w-8 h-8 text-warm" />}
+            title="Calming Playlist"
+            description="Relax with curated peaceful music and nature sounds"
+            onClick={() => navigate("/playlist")}
+          />
+          <FeatureCard
+            icon={<Video className="w-8 h-8 text-primary" />}
+            title="Motivational Videos"
+            description="Inspire your mind with uplifting and powerful content"
+            onClick={() => navigate("/videos")}
+          />
         </div>
 
         {/* CTA Section */}
@@ -226,12 +238,15 @@ const Home = () => {
           <p className="text-muted-foreground mb-6">
             Track your mood, get AI-powered insights, and improve your emotional wellbeing
           </p>
-          <div className="flex gap-4 justify-center">
-            <Button onClick={() => navigate("/journal")} variant="default">
+          <div className="flex gap-4 justify-center flex-wrap">
+            <Button onClick={() => navigate("/journal")} variant="default" size="lg">
               Log Mood
             </Button>
-            <Button onClick={() => navigate("/profile")} variant="outline">
-              View Profile
+            <Button onClick={() => navigate("/playlist")} variant="outline" size="lg">
+              Listen to Music
+            </Button>
+            <Button onClick={() => navigate("/videos")} variant="outline" size="lg">
+              Watch Videos
             </Button>
           </div>
         </div>

@@ -1,0 +1,56 @@
+[
+  {
+    "id": "1",
+    "title": "How to Stay Motivated - The Locus Rule",
+    "description": "Learn the powerful technique to stay motivated through any challenge",
+    "embedId": "0WI2IroVvfM",
+    "thumbnail": "https://img.youtube.com/vi/0WI2IroVvfM/maxresdefault.jpg",
+    "duration": "6:12",
+    "category": "Motivation"
+  },
+  {
+    "id": "2",
+    "title": "The Power of Now - Eckhart Tolle",
+    "description": "Transform your life by living in the present moment",
+    "embedId": "4q1hKTC5vjg",
+    "thumbnail": "https://img.youtube.com/vi/4q1hKTC5vjg/maxresdefault.jpg",
+    "duration": "4:30",
+    "category": "Mindfulness"
+  },
+  {
+    "id": "3",
+    "title": "Growth Mindset vs Fixed Mindset",
+    "description": "Understanding the difference can change your life",
+    "embedId": "KUWn_TJTrnU",
+    "thumbnail": "https://img.youtube.com/vi/KUWn_TJTrnU/maxresdefault.jpg",
+    "duration": "10:20",
+    "category": "Personal Growth"
+  },
+  {
+    "id": "4",
+    "title": "The Science of Happiness",
+    "description": "What makes us truly happy according to science",
+    "embedId": "e0LbwEVnfJA",
+    "thumbnail": "https://img.youtube.com/vi/e0LbwEVnfJA/maxresdefault.jpg",
+    "duration": "12:17",
+    "category": "Happiness"
+  },
+  {
+    "id": "5",
+    "title": "Overcome Anxiety with This Simple Technique",
+    "description": "A practical approach to managing anxiety and stress",
+    "embedId": "WWloIAQpMcQ",
+    "thumbnail": "https://img.youtube.com/vi/WWloIAQpMcQ/maxresdefault.jpg",
+    "duration": "8:45",
+    "category": "Mental Health"
+  },
+  {
+    "id": "6",
+    "title": "The Power of Positive Thinking",
+    "description": "How your thoughts shape your reality",
+    "embedId": "A7ECbYn9t-U",
+    "thumbnail": "https://img.youtube.com/vi/A7ECbYn9t-U/maxresdefault.jpg",
+    "duration": "15:30",
+    "category": "Positivity"
+  }
+]

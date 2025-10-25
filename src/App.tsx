@@ -9,6 +9,8 @@ import MoodJournal from "./pages/MoodJournal";
 import AIAssistant from "./pages/AIAssistant";
 import Activities from "./pages/Activities";
 import Profile from "./pages/Profile";
+import Playlist from "./pages/Playlist";
+import Videos from "./pages/Videos";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -25,6 +27,8 @@ const App = () => (
           <Route path="/journal" element={<MoodJournal />} />
           <Route path="/assistant" element={<AIAssistant />} />
           <Route path="/activities" element={<Activities />} />
+          <Route path="/playlist" element={<Playlist />} />
+          <Route path="/videos" element={<Videos />} />
           <Route path="/profile" element={<Profile />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

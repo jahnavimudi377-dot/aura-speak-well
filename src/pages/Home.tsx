@@ -10,8 +10,8 @@ import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, 
 
 const MOOD_COLORS: Record<string, string> = {
   happy: "hsl(29, 92%, 72%)",
-  calm: "hsl(201, 87%, 77%)",
-  energetic: "hsl(158, 77%, 67%)",
+  amazing: "hsl(201, 87%, 77%)",
+  okay: "hsl(158, 77%, 67%)",
   anxious: "hsl(261, 51%, 71%)",
   sad: "hsl(220, 60%, 65%)",
   stressed: "hsl(0, 84%, 70%)",
@@ -61,42 +61,44 @@ const Home = () => {
       .order("created_at", { ascending: true });
 
     if (!error && data) {
-      // Process data for line chart (last 7 days)
-      const last7Days = data.slice(-7).map((entry) => ({
-        date: new Date(entry.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
-        score: entry.mood_score || getMoodScore(entry.mood_type),
-      }));
+      // Process data for last 7 days mood progression using labels/icons
+      const byDay = new Map<string, any>();
+      data.forEach((entry) => {
+        const d = new Date(entry.created_at);
+        const key = d.toDateString();
+        // keep latest entry per day
+        byDay.set(key, entry);
+      });
+      const days: any[] = [];
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        const key = d.toDateString();
+        const entry = byDay.get(key);
+        days.push({
+          date: d.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+          mood: entry?.mood_type || "-",
+        });
+      }
 
-      // Process data for pie chart (mood distribution)
+      // Mood distribution for last 30 days
       const moodCounts: Record<string, number> = {};
       data.forEach((entry) => {
         moodCounts[entry.mood_type] = (moodCounts[entry.mood_type] || 0) + 1;
       });
-
       const distribution = Object.entries(moodCounts).map(([mood, count]) => ({
         name: mood,
         value: count,
         color: MOOD_COLORS[mood] || "hsl(261, 51%, 71%)",
       }));
 
-      setMoodData(last7Days);
+      setMoodData(days);
       setMoodDistribution(distribution);
     }
     
     setLoading(false);
   };
 
-  const getMoodScore = (moodType: string): number => {
-    const scores: Record<string, number> = {
-      happy: 9,
-      energetic: 8,
-      calm: 7,
-      anxious: 4,
-      stressed: 3,
-      sad: 2,
-    };
-    return scores[moodType] || 5;
-  };
 
   if (!user) return null;
 
@@ -128,32 +130,29 @@ const Home = () => {
         {/* Mood Analytics Dashboard */}
         {!loading && moodData.length > 0 && (
           <div className="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto mb-12 animate-slide-up">
-            {/* Mood Trend Chart */}
+            {/* Mood Progress (7 days) */}
             <Card className="p-6">
               <div className="flex items-center gap-2 mb-4">
                 <TrendingUp className="w-5 h-5 text-primary" />
-                <h3 className="text-lg font-semibold">7-Day Mood Trend</h3>
+                <h3 className="text-lg font-semibold">7-Day Mood Progress</h3>
               </div>
-              <ResponsiveContainer width="100%" height={200}>
-                <LineChart data={moodData}>
-                  <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                  <YAxis hide domain={[0, 10]} />
-                  <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: "hsl(var(--card))", 
-                      border: "1px solid hsl(var(--border))",
-                      borderRadius: "0.5rem"
-                    }} 
-                  />
-                  <Line 
-                    type="monotone" 
-                    dataKey="score" 
-                    stroke="hsl(var(--primary))" 
-                    strokeWidth={3}
-                    dot={{ fill: "hsl(var(--primary))", r: 4 }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
+              <div className="grid grid-cols-7 gap-3">
+                {moodData.map((d) => (
+                  <div key={d.date} className="text-center p-3 rounded-lg border bg-card">
+                    <div className="text-xs text-muted-foreground mb-1">{d.date}</div>
+                    <div className="text-2xl">
+                      {d.mood === "happy" && "😄"}
+                      {d.mood === "amazing" && "😊"}
+                      {d.mood === "okay" && "😐"}
+                      {d.mood === "sad" && "😢"}
+                      {d.mood === "stressed" && "😰"}
+                      {d.mood === "anxious" && "😟"}
+                      {d.mood === "-" && "—"}
+                    </div>
+                    <div className="text-xs capitalize mt-1 text-muted-foreground">{d.mood}</div>
+                  </div>
+                ))}
+              </div>
             </Card>
 
             {/* Mood Distribution */}

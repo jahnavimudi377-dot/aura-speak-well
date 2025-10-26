@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Wind, BookOpen, Puzzle, Sparkles, Music, Play } from "lucide-react";
 import ActivityModal from "@/components/ActivityModal";
 import { useToast } from "@/hooks/use-toast";
+import WordAssociationGame from "@/components/games/WordAssociationGame";
 
 const activityIcons = {
   breathing: Wind,
@@ -55,6 +56,16 @@ const Activities = () => {
 
     if (!error && data) {
       setActivities(data);
+      // Open a specific activity if requested via URL
+      const params = new URLSearchParams(window.location.search);
+      const openType = params.get("open");
+      if (openType) {
+        const match = data.find((a) => a.type === openType || a.title?.toLowerCase().includes(openType));
+        if (match) {
+          setSelectedActivity(match);
+          setIsModalOpen(true);
+        }
+      }
     }
   };
 
@@ -121,6 +132,18 @@ const Activities = () => {
               </Card>
             );
           })}
+        </div>
+
+        {/* Mini Games */}
+        <div className="mt-10">
+          <div className="mb-4">
+            <h2 className="text-2xl font-bold">Mini Games</h2>
+            <p className="text-muted-foreground">Quick mind exercises to shift your focus</p>
+          </div>
+          {/* Word Association inline */}
+          {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
+          {/* @ts-ignore */}
+          <WordAssociationGame />
         </div>
 
         <ActivityModal

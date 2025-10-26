@@ -41,7 +41,21 @@ const Playlist = () => {
     // Fetch playlist from JSON file
     fetch("/data/playlist.json")
       .then((response) => response.json())
-      .then((data) => setSongs(data))
+      .then((data) => {
+        setSongs(data);
+        const params = new URLSearchParams(window.location.search);
+        const openId = params.get("open");
+        const embedId = params.get("embedId");
+        const autoplay = params.get("autoplay");
+        let toOpen: Song | undefined;
+        if (openId) toOpen = data.find((s: Song) => s.id === openId);
+        if (!toOpen && embedId) toOpen = data.find((s: Song) => s.embedId === embedId);
+        if (!toOpen && autoplay === "1") toOpen = data[0];
+        if (toOpen) {
+          setSelectedSong(toOpen);
+          setIsModalOpen(true);
+        }
+      })
       .catch((error) => {
         console.error("Error loading playlist:", error);
         toast({
@@ -123,6 +137,8 @@ const Playlist = () => {
                   Open in YouTube
                 </Button>
               </DialogTitle>
+              {/* Accessibility description to remove warning */}
+              <p className="sr-only">Song player modal with embedded video</p>
             </DialogHeader>
             {selectedSong && (
               <div className="aspect-video w-full">

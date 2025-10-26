@@ -69,10 +69,10 @@ const MoodJournal = () => {
   };
 
   const analyzeWithAI = async () => {
-    if (!notes.trim()) {
+    if (!notes.trim() && !selectedMood) {
       toast({
-        title: "No text to analyze",
-        description: "Please write something first.",
+        title: "Nothing to analyze",
+        description: "Select a mood or write a note first.",
         variant: "destructive",
       });
       return;
@@ -80,8 +80,9 @@ const MoodJournal = () => {
 
     setAnalyzing(true);
     try {
+      const textPayload = `Mood: ${selectedMood ?? "unspecified"}. Notes: ${notes || ""}`;
       const { data, error } = await supabase.functions.invoke("analyze-mood", {
-        body: { text: notes },
+        body: { text: textPayload },
       });
 
       if (error) throw error;
@@ -109,32 +110,32 @@ const MoodJournal = () => {
     const recommendations: Record<MoodType, Array<{ title: string; description: string; action: string; route: string }>> = {
       amazing: [
         { title: "Share Your Joy", description: "Spread positivity by connecting with loved ones", action: "Message Someone", route: "/assistant" },
-        { title: "Gratitude Journal", description: "Write down what made today amazing", action: "Start Writing", route: "/journal" },
-        { title: "Uplifting Music", description: "Celebrate with energizing tunes", action: "Play Music", route: "/playlist" },
+        { title: "Gratitude Journal", description: "Write down what made today amazing", action: "Start Writing", route: "/activities?open=journaling" },
+        { title: "Uplifting Music", description: "Celebrate with energizing tunes", action: "Play Music", route: "/playlist?autoplay=1" },
       ],
       happy: [
-        { title: "Fun Puzzles", description: "Keep the positive momentum with brain games", action: "Play Now", route: "/activities" },
-        { title: "Motivational Videos", description: "Get inspired for tomorrow", action: "Watch Now", route: "/videos" },
-        { title: "Express Yourself", description: "Share your happiness in your journal", action: "Write Entry", route: "/journal" },
+        { title: "Fun Puzzles", description: "Keep the positive momentum with brain games", action: "Play Now", route: "/activities?open=puzzle" },
+        { title: "Motivational Videos", description: "Get inspired for tomorrow", action: "Watch Now", route: "/videos?category=Motivation&autoplay=1" },
+        { title: "Express Yourself", description: "Share your happiness in your journal", action: "Write Entry", route: "/activities?open=journaling" },
       ],
       okay: [
-        { title: "Light Activities", description: "Try simple exercises to boost your mood", action: "Try Now", route: "/activities" },
-        { title: "Calming Music", description: "Relax with soothing sounds", action: "Listen", route: "/playlist" },
+        { title: "Light Activities", description: "Try simple exercises to boost your mood", action: "Try Now", route: "/activities?open=breathing" },
+        { title: "Calming Music", description: "Relax with soothing sounds", action: "Listen", route: "/playlist?autoplay=1" },
         { title: "Chat with AI", description: "Talk about your day with our AI companion", action: "Start Chat", route: "/assistant" },
       ],
       sad: [
-        { title: "Uplifting Videos", description: "Watch motivational content to lift your spirits", action: "Watch Now", route: "/videos" },
-        { title: "Calming Music", description: "Listen to comforting melodies", action: "Play Music", route: "/playlist" },
+        { title: "Uplifting Videos", description: "Watch motivational content to lift your spirits", action: "Watch Now", route: "/videos?category=Uplifting&autoplay=1" },
+        { title: "Calming Music", description: "Listen to comforting melodies", action: "Play Music", route: "/playlist?autoplay=1" },
         { title: "Talk It Out", description: "Share your feelings with our AI assistant", action: "Start Chat", route: "/assistant" },
       ],
       stressed: [
-        { title: "Breathing Exercise", description: "Calm your mind with guided breathing", action: "Start Now", route: "/activities" },
-        { title: "Relaxation Music", description: "Unwind with peaceful sounds", action: "Listen", route: "/playlist" },
+        { title: "Breathing Exercise", description: "Calm your mind with guided breathing", action: "Start Now", route: "/activities?open=breathing" },
+        { title: "Relaxation Music", description: "Unwind with peaceful sounds", action: "Listen", route: "/playlist?autoplay=1" },
         { title: "AI Support", description: "Get personalized stress-relief suggestions", action: "Get Help", route: "/assistant" },
       ],
       anxious: [
-        { title: "Calming Activities", description: "Ground yourself with relaxation exercises", action: "Try Now", route: "/activities" },
-        { title: "Peaceful Sounds", description: "Listen to anxiety-reducing music", action: "Play Music", route: "/playlist" },
+        { title: "Calming Activities", description: "Ground yourself with relaxation exercises", action: "Try Now", route: "/activities?open=breathing" },
+        { title: "Peaceful Sounds", description: "Listen to anxiety-reducing music", action: "Play Music", route: "/playlist?autoplay=1" },
         { title: "Guided Support", description: "Talk through your worries with AI", action: "Chat Now", route: "/assistant" },
       ],
     };
@@ -254,7 +255,7 @@ const MoodJournal = () => {
               <Button
                 type="button"
                 onClick={analyzeWithAI}
-                disabled={analyzing || !notes.trim()}
+                disabled={analyzing || (!notes.trim() && !selectedMood)}
                 variant="outline"
                 className="flex-1"
               >

@@ -42,7 +42,26 @@ const Videos = () => {
     // Fetch videos from JSON file
     fetch("/data/videos.json")
       .then((response) => response.json())
-      .then((data) => setVideos(data))
+      .then((data) => {
+        setVideos(data);
+        const params = new URLSearchParams(window.location.search);
+        const openId = params.get("open");
+        const embedId = params.get("embedId");
+        const category = params.get("category");
+        const autoplay = params.get("autoplay");
+        if (category) setFilter(category);
+        let toOpen: VideoItem | undefined;
+        if (openId) toOpen = data.find((v: VideoItem) => v.id === openId);
+        if (!toOpen && embedId) toOpen = data.find((v: VideoItem) => v.embedId === embedId);
+        if (!toOpen && autoplay === "1") {
+          const list = category ? data.filter((v: VideoItem) => v.category === category) : data;
+          toOpen = list[0];
+        }
+        if (toOpen) {
+          setSelectedVideo(toOpen);
+          setIsModalOpen(true);
+        }
+      })
       .catch((error) => {
         console.error("Error loading videos:", error);
         toast({
@@ -148,6 +167,8 @@ const Videos = () => {
                   Open in YouTube
                 </Button>
               </DialogTitle>
+              {/* Accessibility description to remove warning */}
+              <p className="sr-only">Video player modal with embedded YouTube</p>
             </DialogHeader>
             {selectedVideo && (
               <div className="space-y-4">

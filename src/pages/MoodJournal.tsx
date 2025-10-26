@@ -105,6 +105,42 @@ const MoodJournal = () => {
     }
   };
 
+  const getMoodRecommendations = (mood: MoodType) => {
+    const recommendations: Record<MoodType, Array<{ title: string; description: string; action: string; route: string }>> = {
+      amazing: [
+        { title: "Share Your Joy", description: "Spread positivity by connecting with loved ones", action: "Message Someone", route: "/assistant" },
+        { title: "Gratitude Journal", description: "Write down what made today amazing", action: "Start Writing", route: "/journal" },
+        { title: "Uplifting Music", description: "Celebrate with energizing tunes", action: "Play Music", route: "/playlist" },
+      ],
+      happy: [
+        { title: "Fun Puzzles", description: "Keep the positive momentum with brain games", action: "Play Now", route: "/activities" },
+        { title: "Motivational Videos", description: "Get inspired for tomorrow", action: "Watch Now", route: "/videos" },
+        { title: "Express Yourself", description: "Share your happiness in your journal", action: "Write Entry", route: "/journal" },
+      ],
+      okay: [
+        { title: "Light Activities", description: "Try simple exercises to boost your mood", action: "Try Now", route: "/activities" },
+        { title: "Calming Music", description: "Relax with soothing sounds", action: "Listen", route: "/playlist" },
+        { title: "Chat with AI", description: "Talk about your day with our AI companion", action: "Start Chat", route: "/assistant" },
+      ],
+      sad: [
+        { title: "Uplifting Videos", description: "Watch motivational content to lift your spirits", action: "Watch Now", route: "/videos" },
+        { title: "Calming Music", description: "Listen to comforting melodies", action: "Play Music", route: "/playlist" },
+        { title: "Talk It Out", description: "Share your feelings with our AI assistant", action: "Start Chat", route: "/assistant" },
+      ],
+      stressed: [
+        { title: "Breathing Exercise", description: "Calm your mind with guided breathing", action: "Start Now", route: "/activities" },
+        { title: "Relaxation Music", description: "Unwind with peaceful sounds", action: "Listen", route: "/playlist" },
+        { title: "AI Support", description: "Get personalized stress-relief suggestions", action: "Get Help", route: "/assistant" },
+      ],
+      anxious: [
+        { title: "Calming Activities", description: "Ground yourself with relaxation exercises", action: "Try Now", route: "/activities" },
+        { title: "Peaceful Sounds", description: "Listen to anxiety-reducing music", action: "Play Music", route: "/playlist" },
+        { title: "Guided Support", description: "Talk through your worries with AI", action: "Chat Now", route: "/assistant" },
+      ],
+    };
+    return recommendations[mood] || recommendations.okay;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedMood || !user) return;
@@ -126,7 +162,7 @@ const MoodJournal = () => {
         description: "Your mood has been recorded successfully.",
       });
 
-      setSelectedMood(null);
+      // Keep selectedMood to show recommendations, but clear others
       setNotes("");
       setDetectedEmotion("");
       setAiSuggestion("");
@@ -156,7 +192,7 @@ const MoodJournal = () => {
           <p className="text-muted-foreground">How are you feeling today?</p>
         </div>
 
-        <Card className="p-8 mb-8 shadow-card transition-smooth hover:shadow-mood">
+        <Card className="p-8 mb-8 glass-card shadow-soft transition-smooth hover:shadow-mood">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <Label className="text-lg mb-4 block font-semibold">Select your mood</Label>
@@ -244,6 +280,40 @@ const MoodJournal = () => {
             </div>
           </form>
         </Card>
+
+        {/* Mood-Based Activity Recommendations */}
+        {selectedMood && !loading && (
+          <Card className="p-8 mb-8 glass-premium shadow-glow transition-spring animate-slide-up border-primary/20">
+            <div className="flex items-center gap-3 mb-6">
+              <Sparkles className="w-6 h-6 text-primary animate-pulse-glow" />
+              <h2 className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                Recommended For You
+              </h2>
+            </div>
+            <p className="text-muted-foreground mb-6">
+              Based on your {moodOptions.find(m => m.type === selectedMood)?.label.toLowerCase()} mood, here are some personalized activities:
+            </p>
+            <div className="grid md:grid-cols-3 gap-4">
+              {getMoodRecommendations(selectedMood).map((rec, idx) => (
+                <Card 
+                  key={idx}
+                  className="p-6 glass-card hover:shadow-mood transition-spring hover:scale-105 cursor-pointer group"
+                  onClick={() => navigate(rec.route)}
+                >
+                  <h3 className="font-semibold mb-2 text-lg group-hover:text-primary transition-smooth">
+                    {rec.title}
+                  </h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    {rec.description}
+                  </p>
+                  <Button variant="outline" size="sm" className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-smooth">
+                    {rec.action}
+                  </Button>
+                </Card>
+              ))}
+            </div>
+          </Card>
+        )}
 
         {/* Mood History */}
         <div className="space-y-4">

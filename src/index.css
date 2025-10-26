@@ -8,7 +8,7 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* Wellness color palette - soft, calming, premium */
+    /* Premium Wellness Palette - Luxury & Serenity */
     --background: 252 100% 98%;
     --foreground: 260 20% 20%;
 
@@ -23,16 +23,16 @@ All colors MUST be HSL.
     --primary-foreground: 0 0% 100%;
     --primary-glow: 261 51% 85%;
 
-    /* Secondary: Pastel Blue - trust and clarity */
-    --secondary: 201 87% 77%;
+    /* Secondary: Teal Blue - tranquility */
+    --secondary: 180 65% 70%;
     --secondary-foreground: 260 20% 20%;
 
     /* Accent: Mint Green - wellness and growth */
     --accent: 158 77% 67%;
     --accent-foreground: 260 20% 20%;
 
-    /* Warm: Peach - happiness and energy */
-    --warm: 29 92% 72%;
+    /* Warm: Blush Pink - comfort and care */
+    --warm: 340 82% 78%;
     --warm-foreground: 260 20% 20%;
 
     --muted: 252 60% 96%;
@@ -45,21 +45,26 @@ All colors MUST be HSL.
     --input: 252 40% 90%;
     --ring: 261 51% 71%;
 
-    --radius: 1rem;
+    --radius: 1.25rem;
 
-    /* Wellness gradients */
-    --gradient-hero: linear-gradient(135deg, hsl(261 51% 71% / 0.15), hsl(158 77% 67% / 0.15), hsl(201 87% 77% / 0.15));
-    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%), hsl(252 100% 98%));
-    --gradient-mood: linear-gradient(135deg, hsl(261 51% 85%), hsl(201 87% 85%), hsl(158 77% 85%));
+    /* Premium Luxury Gradients */
+    --gradient-hero: linear-gradient(135deg, hsl(261 51% 71% / 0.2), hsl(180 65% 70% / 0.2), hsl(340 82% 78% / 0.15));
+    --gradient-card: linear-gradient(145deg, hsl(0 0% 100% / 0.9), hsl(252 100% 98% / 0.95));
+    --gradient-mood: linear-gradient(135deg, hsl(261 51% 80%), hsl(180 65% 75%), hsl(158 77% 75%));
+    --gradient-glow: radial-gradient(circle at 50% 50%, hsl(261 51% 71% / 0.3), transparent 70%);
+    --gradient-glass: linear-gradient(135deg, hsl(0 0% 100% / 0.1), hsl(0 0% 100% / 0.05));
     
-    /* Smooth animations */
-    --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    --transition-bounce: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    /* Smooth Premium Animations */
+    --transition-smooth: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.7s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    --transition-spring: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
     
-    /* Shadows */
-    --shadow-soft: 0 4px 20px hsl(261 51% 71% / 0.1);
-    --shadow-mood: 0 8px 30px hsl(261 51% 71% / 0.2);
-    --shadow-card: 0 2px 12px hsl(261 20% 50% / 0.08);
+    /* Luxury Shadows & Glows */
+    --shadow-soft: 0 4px 24px hsl(261 51% 71% / 0.12);
+    --shadow-mood: 0 8px 40px hsl(261 51% 71% / 0.25);
+    --shadow-card: 0 4px 16px hsl(261 20% 50% / 0.1);
+    --shadow-glow: 0 0 40px hsl(261 51% 71% / 0.4), 0 0 80px hsl(180 65% 70% / 0.2);
+    --shadow-float: 0 12px 40px hsl(261 51% 71% / 0.2), 0 0 20px hsl(261 51% 71% / 0.15);
 
     --sidebar-background: 0 0% 98%;
 
@@ -92,13 +97,13 @@ All colors MUST be HSL.
     --primary-foreground: 0 0% 100%;
     --primary-glow: 261 51% 60%;
 
-    --secondary: 201 50% 40%;
+    --secondary: 180 50% 50%;
     --secondary-foreground: 252 100% 98%;
 
     --accent: 158 50% 45%;
     --accent-foreground: 252 100% 98%;
 
-    --warm: 29 70% 55%;
+    --warm: 340 70% 65%;
     --warm-foreground: 0 0% 100%;
 
     --muted: 260 30% 18%;
@@ -111,13 +116,17 @@ All colors MUST be HSL.
     --input: 260 30% 20%;
     --ring: 261 51% 71%;
 
-    --gradient-hero: linear-gradient(135deg, hsl(261 51% 25% / 0.5), hsl(158 50% 25% / 0.5), hsl(201 50% 25% / 0.5));
-    --gradient-card: linear-gradient(180deg, hsl(260 35% 12%), hsl(260 40% 10%));
-    --gradient-mood: linear-gradient(135deg, hsl(261 51% 40%), hsl(201 50% 40%), hsl(158 50% 40%));
+    --gradient-hero: linear-gradient(135deg, hsl(261 51% 25% / 0.6), hsl(180 50% 25% / 0.5), hsl(340 70% 30% / 0.4));
+    --gradient-card: linear-gradient(145deg, hsl(260 35% 14% / 0.95), hsl(260 40% 10% / 0.98));
+    --gradient-mood: linear-gradient(135deg, hsl(261 51% 40%), hsl(180 50% 40%), hsl(158 50% 40%));
+    --gradient-glow: radial-gradient(circle at 50% 50%, hsl(261 51% 71% / 0.2), transparent 70%);
+    --gradient-glass: linear-gradient(135deg, hsl(0 0% 100% / 0.05), hsl(0 0% 100% / 0.02));
     
-    --shadow-soft: 0 4px 20px hsl(0 0% 0% / 0.3);
-    --shadow-mood: 0 8px 30px hsl(261 51% 71% / 0.3);
-    --shadow-card: 0 2px 12px hsl(0 0% 0% / 0.2);
+    --shadow-soft: 0 4px 24px hsl(0 0% 0% / 0.4);
+    --shadow-mood: 0 8px 40px hsl(261 51% 71% / 0.4);
+    --shadow-card: 0 4px 16px hsl(0 0% 0% / 0.3);
+    --shadow-glow: 0 0 40px hsl(261 51% 71% / 0.5), 0 0 80px hsl(180 65% 70% / 0.3);
+    --shadow-float: 0 12px 40px hsl(261 51% 71% / 0.3), 0 0 20px hsl(261 51% 71% / 0.2);
 
     --sidebar-background: 260 40% 10%;
     --sidebar-foreground: 252 100% 98%;
@@ -176,6 +185,14 @@ All colors MUST be HSL.
     background: var(--gradient-mood);
   }
 
+  .gradient-glow {
+    background: var(--gradient-glow);
+  }
+
+  .gradient-glass {
+    background: var(--gradient-glass);
+  }
+
   .shadow-soft {
     box-shadow: var(--shadow-soft);
   }
@@ -188,12 +205,24 @@ All colors MUST be HSL.
     box-shadow: var(--shadow-card);
   }
 
+  .shadow-glow {
+    box-shadow: var(--shadow-glow);
+  }
+
+  .shadow-float {
+    box-shadow: var(--shadow-float);
+  }
+
   .transition-smooth {
     transition: var(--transition-smooth);
   }
 
   .transition-bounce {
     transition: var(--transition-bounce);
+  }
+
+  .transition-spring {
+    transition: var(--transition-spring);
   }
 
   .animate-float {
@@ -206,5 +235,20 @@ All colors MUST be HSL.
 
   .animate-slide-up {
     animation: slide-up 0.6s ease-out;
+  }
+
+  /* Glassmorphism Effects */
+  .glass-card {
+    background: var(--gradient-glass);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid hsl(var(--border) / 0.2);
+  }
+
+  .glass-premium {
+    background: linear-gradient(135deg, hsl(0 0% 100% / 0.15), hsl(0 0% 100% / 0.05));
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid hsl(var(--border) / 0.3);
   }
 }
